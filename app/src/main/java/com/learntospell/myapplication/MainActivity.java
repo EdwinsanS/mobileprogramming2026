@@ -1,5 +1,7 @@
 package com.learntospell.myapplication;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Handler;
@@ -33,6 +35,7 @@ public class MainActivity extends AppCompatActivity {
     private HashMap<String, String> kamusEasy, kamusMedium, kamusDifficult, kamus;
     private ArrayList<String> kataEasy, kataMedium, kataDifficult, kata;
     int JUMLAH_OPSI=5;
+    int JUMLAH_SOAL=10;
     private RecyclerView rvOpsi;
     private OpsiAdapter adapter;
     private TextView textHasil;
@@ -42,6 +45,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView textSkor;
     private int skorBenar = 0;
     private int skorSalah = 0;
+    private int soalKe = 0;
 
     private static final String TAG_TIMER = "Timer";
     private static final long DURASI_SOAL = 15000;
@@ -137,6 +141,36 @@ public class MainActivity extends AppCompatActivity {
         letsPlay();
     }
 
+
+    private String kodeLevel() {
+        int id = radioGroupLevel.getCheckedRadioButtonId();
+        if(id==R.id.radioEasy) return "Easy";
+        if(id==R.id.radioMedium) return "Medium";
+        return "Hard";
+    }
+
+    private void mulaiSesiBaru() {
+        soalKe = 0;
+        skorBenar = 0;
+        skorSalah = 0;
+        letsPlay();
+    }
+
+    private void tampilkanRingkasan() {
+        int nilai = skorBenar * 100 / JUMLAH_SOAL;
+        new AlertDialog.Builder(this)
+                .setTitle("Sesi Selesai")
+                .setMessage("Level:" + kodeLevel())
+                .setPositiveButton("Mau main lagi?", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        mulaiSesiBaru();
+                    }
+                }).show();
+
+
+    }
+
     private void pilihLevel(int checkedId) {
         if (checkedId == R.id.radioEasy) {
             kamus = kamusEasy;
@@ -152,30 +186,42 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void letsPlay() {
-        opsiJawaban = new ArrayList<>();
-        soal = null;
-        textHasil.setText("");
 
-
-        ArrayList<String> acak = new ArrayList<>(kata);
-        Collections.shuffle(acak);
-        soal= acak.get(0);
-
-        for (int i = 0; i < JUMLAH_OPSI; i++) {
-            opsiJawaban.add(kamus.get(acak.get(i)));
+        if(soalKe >= JUMLAH_SOAL) {
+            selesaiSesi();
+            return;
         }
-        Collections.shuffle(opsiJawaban);
 
-        TextView textSoal = findViewById(R.id.vocab);
-        textSoal.setText(soal);
-        // adapter.setOpsi(opsiJawaban);
-        textHasil.setText("");
-        adapter.setOpsi(opsiJawaban, opsiJawaban.indexOf(kamus.get(soal)));
-
-        sisaMs = DURASI_SOAL;
-        mulaiTimer(sisaMs);
+        soalKe++;
+            opsiJawaban = new ArrayList<>();
+            soal = null;
+            textHasil.setText("");
 
 
+            ArrayList<String> acak = new ArrayList<>(kata);
+            Collections.shuffle(acak);
+            soal = acak.get(0);
+
+            for (int i = 0; i < JUMLAH_OPSI; i++) {
+                opsiJawaban.add(kamus.get(acak.get(i)));
+            }
+            Collections.shuffle(opsiJawaban);
+
+            TextView textSoal = findViewById(R.id.vocab);
+            textSoal.setText(soal);
+            // adapter.setOpsi(opsiJawaban);
+            textHasil.setText("");
+            adapter.setOpsi(opsiJawaban, opsiJawaban.indexOf(kamus.get(soal)));
+
+            sisaMs = DURASI_SOAL;
+            mulaiTimer(sisaMs);
+
+        }
+
+    private void selesaiSesi() {
+        hentikanTimer();
+        sudahDijawab = true;
+        tampilkanRingkasan();
     }
 
 
@@ -207,7 +253,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void updateSkor() {
-        textSkor.setText("Benar: " + skorBenar + "  Salah: " + skorSalah);
+        textSkor.setText("Soal no: " + (soalKe+1) + "Benar: " + skorBenar + "  Salah: " + skorSalah);
     }
 
     private void mulaiTimer(long durasi) {
