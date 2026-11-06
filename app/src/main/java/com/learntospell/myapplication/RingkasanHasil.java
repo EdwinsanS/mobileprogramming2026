@@ -33,7 +33,6 @@ public class RingkasanHasil extends AppCompatActivity {
         int salah = intent.getIntExtra("JUMLAH_SALAH", 0);
         int jumlahSoal = intent.getIntExtra("JUMLAH_SOAL", 1);
 
-        int nilai = (benar * 100) / jumlahSoal;
         ArrayList<String> soalSalah = intent.getStringArrayListExtra("DAFTAR_SALAH");
 
         if (soalSalah == null) {
@@ -43,12 +42,13 @@ public class RingkasanHasil extends AppCompatActivity {
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 this, android.R.layout.simple_list_item_1, soalSalah);
 
-        TextView summaryText = findViewById(R.id.ringkasan);
-        summaryText.setText("Level: " + level + "\nBenar: " + benar + "\nSalah: " + salah + "\nNilai: " + nilai);
 
         ListView listSalah = findViewById(R.id.lstSalah);
-
         listSalah.setAdapter(adapter);
+
+        int nilai = (benar * 100) / jumlahSoal;
+        TextView summaryText = findViewById(R.id.ringkasan);
+        summaryText.setText("Level: " + level + "\nBenar: " + benar + "\nSalah: " + salah + "\nNilai: " + nilai);
 
         Button btnMainLagi = findViewById(R.id.btnMainLagi);
         btnMainLagi.setOnClickListener(new View.OnClickListener() {

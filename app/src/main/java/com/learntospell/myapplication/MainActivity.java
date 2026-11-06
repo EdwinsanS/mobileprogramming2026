@@ -122,8 +122,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 pilihLevel(checkedId);
-                letsPlay();
-            }
+                mulaiSesiBaru();            }
         });
 
         if (savedInstanceState != null)
@@ -148,19 +147,22 @@ public class MainActivity extends AppCompatActivity {
         int id = radioGroupLevel.getCheckedRadioButtonId();
         if(id==R.id.radioEasy) return "Easy";
         if(id==R.id.radioMedium) return "Medium";
-        return "Difficult";
+        return "Hard";
     }
 
     private void mulaiSesiBaru() {
         soalKe = 0;
         skorBenar = 0;
         skorSalah = 0;
-        listKesalahan.clear();
+        sudahDijawab = false;
+        if(listKesalahan != null) {
+            listKesalahan.clear();
+        }
         letsPlay();
     }
 
     private void tampilkanRingkasan() {
-        int nilai = skorBenar * 100 / JUMLAH_SOAL;
+        int nilai = (skorBenar * 100) / JUMLAH_SOAL;
         new AlertDialog.Builder(this)
                 .setTitle("Sesi Selesai")
                 .setMessage("Level:" + kodeLevel())
@@ -246,9 +248,8 @@ public class MainActivity extends AppCompatActivity {
             textHasil.setText("Benar!");
         } else {
             skorSalah++;
-            textHasil.setText("Salah. Jawaban benar: " + benar);
-            listKesalahan.add("Soal: " + soal + "\nJawaban Benar: " + benar + "\n(Kamu jawab: " + diklik + ")");
-
+            listKesalahan.add(soal + ": " + benar);
+            textHasil.setText("Salah . Jawaban benar:" + benar);
         }
         updateSkor();
     }
@@ -319,7 +320,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d(TAG_LC, "onResume");
-        if (!sudahDijawab && sisaMs > 0) {
+        if (soalKe >= JUMLAH_SOAL) {
+            mulaiSesiBaru();
+        }
+        else if (!sudahDijawab && sisaMs > 0) {
             mulaiTimer(sisaMs);
         }
     }
